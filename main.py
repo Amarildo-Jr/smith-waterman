@@ -8,11 +8,11 @@ def build_alignment_matrix(seq1, seq2, gap, match, mismatch):
 
     for i in range(1, len_seq1 + 1):
         alignment_matrix[i][0] = i * gap
-        traceback_matrix[i][0] = 'up'
+        traceback_matrix[i][0] = 'cima'
 
     for j in range(1, len_seq2 + 1):
         alignment_matrix[0][j] = j * gap
-        traceback_matrix[0][j] = 'right'
+        traceback_matrix[0][j] = 'direita'
 
     print(matrix_print(alignment_matrix, "Matriz de alinhamento preenchida com os valores iniciais"))
     print(matrix_print(traceback_matrix, "Matriz de rastreamento"))
@@ -29,10 +29,10 @@ def build_alignment_matrix(seq1, seq2, gap, match, mismatch):
                 traceback_matrix[i][j] = 'diagonal'
             elif vertical >= horizontal:
                 alignment_matrix[i][j] = vertical
-                traceback_matrix[i][j] = 'up'
+                traceback_matrix[i][j] = 'cima'
             else:
                 alignment_matrix[i][j] = horizontal
-                traceback_matrix[i][j] = 'right'
+                traceback_matrix[i][j] = 'direita'
         
     print(matrix_print(alignment_matrix, "Matriz de alinhamento preenchida com os valores finais"))
     print(matrix_print(traceback_matrix, "Matriz de rastreamento final"))
@@ -40,11 +40,11 @@ def build_alignment_matrix(seq1, seq2, gap, match, mismatch):
     return alignment_matrix, traceback_matrix
 
 def matrix_print(matrix, matrix_name: str):
-    print("=====================================================================================================")
-    print(f"{matrix_name.upper()}:")
-    matrix_str = ""
+    matrix_str = "=" * 80 + "\n"
+    matrix_str += f"{matrix_name}:\n"
     for i in range(len(matrix) - 1, -1, -1):
         matrix_str += str(matrix[i]) + "\n"
+    matrix_str += "=" * 80 + "\n"
     return matrix_str
 
 def backtrace(traceback_matrix, seq1, seq2):
@@ -58,7 +58,7 @@ def backtrace(traceback_matrix, seq1, seq2):
             align_seq2 = seq2[j - 1] + align_seq2
             i -= 1
             j -= 1
-        elif i > 0 and traceback_matrix[i][j] == 'up':
+        elif i > 0 and traceback_matrix[i][j] == 'cima':
             align_seq1 = seq1[i - 1] + align_seq1
             align_seq2 = "-" + align_seq2
             i -= 1
@@ -72,9 +72,6 @@ def backtrace(traceback_matrix, seq1, seq2):
 if __name__ == "__main__":
     output_file = "output.txt"
 
-    with open(output_file, "w") as file:
-        file.write("Alignment Matrix:\n")
-
     with open("input.txt", "r") as file:
         seq1 = file.readline().strip()
         seq2 = file.readline().strip()
@@ -86,21 +83,18 @@ if __name__ == "__main__":
 
     result = backtrace(traceback_matrix, seq1, seq2)
 
-    with open(output_file, "a") as file:
-        file.write("\nAligned Sequences:\n")
-        file.write(result[0] + "\n")
-        file.write(result[1] + "\n")
-
-        # Calculating alignment score, match, mismatch, and gap counts
+    with open(output_file, "w") as file:
         alignment_score = alignment_matrix[len(seq1)][len(seq2)]
-        match_count = sum(1 for a, b in zip(result[0], result[1]) if a == b)
-        mismatch_count = sum(1 for a, b in zip(result[0], result[1]) if a != b)
-        gap_count = result[0].count('-') + result[1].count('-')
 
-        # Printing additional information
+        alignment_matrix_str = matrix_print(alignment_matrix, "Matriz de alinhamento final")
+        file.write(alignment_matrix_str)
+
+        traceback_matrix_str = matrix_print(traceback_matrix, "Matriz de rastreamento final")
+        file.write(traceback_matrix_str)
+
         file.write("\n------------------------------------------------------------------\n")
-        file.write(f"Alignment score = {alignment_score} | Match = {match_count} | Mismatch = {mismatch_count} | Gap = {gap_count}\n")
-        file.write(f"Values used: Gap = {gap_penalty}, Match = {match_score}, Mismatch = {mismatch_score}\n")
-        file.write("------------------------------------------------------------------\n")
+        file.write(f"Score = {alignment_score} | Match = {match_score} | Mismatch = {mismatch_score} | Gap = {gap_penalty}")
+        file.write("\n------------------------------------------------------------------\n")
+        file.write("\nSequencias Alinhadas:\n")
         file.write(result[0] + "\n")
         file.write(result[1] + "\n")
