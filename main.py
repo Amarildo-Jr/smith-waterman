@@ -10,9 +10,12 @@ def build_alignment_matrix(seq1, seq2, gap, match, mismatch):
         alignment_matrix[i][0] = i * gap
         traceback_matrix[i][0] = 'up'
 
-    for j in range(len_seq2 + 1):
+    for j in range(1, len_seq2 + 1):
         alignment_matrix[0][j] = j * gap
-        traceback_matrix[0][j] = 'left'
+        traceback_matrix[0][j] = 'right'
+
+    print(matrix_print(alignment_matrix, "Matriz de alinhamento preenchida com os valores iniciais"))
+    print(matrix_print(traceback_matrix, "Matriz de rastreamento"))
 
     for i in range(1, len_seq1 + 1):
         for j in range(1, len_seq2 + 1):
@@ -29,26 +32,20 @@ def build_alignment_matrix(seq1, seq2, gap, match, mismatch):
                 traceback_matrix[i][j] = 'up'
             else:
                 alignment_matrix[i][j] = horizontal
-                traceback_matrix[i][j] = 'left'
+                traceback_matrix[i][j] = 'right'
+        
+    print(matrix_print(alignment_matrix, "Matriz de alinhamento preenchida com os valores finais"))
+    print(matrix_print(traceback_matrix, "Matriz de rastreamento final"))
 
     return alignment_matrix, traceback_matrix
 
-def print_alignment_matrix(alignment_matrix, seq1, seq2, output_file):
-    # Modify the following lines to write to the output file instead of printing
-    with open(output_file, "a") as file:
-        for i in range(len(alignment_matrix) - 1, -1, -1):
-            if i > 0:
-                file.write(seq1[i - 1] + " ")
-            else:
-                file.write("- ")
-
-            for j, value in enumerate(alignment_matrix[i]):
-                # Adjust the loop to iterate through the alignment matrix correctly
-                if i > 0:
-                    file.write(f"{seq2[j - 1] if j > 0 else '-': >4}")
-                else:
-                    file.write(f"{seq2[j - 1] if j > 0 else '-': >4}")
-            file.write("\n")
+def matrix_print(matrix, matrix_name: str):
+    print("=====================================================================================================")
+    print(f"{matrix_name.upper()}:")
+    matrix_str = ""
+    for i in range(len(matrix) - 1, -1, -1):
+        matrix_str += str(matrix[i]) + "\n"
+    return matrix_str
 
 def backtrace(traceback_matrix, seq1, seq2):
     align_seq1 = ""
@@ -87,10 +84,6 @@ if __name__ == "__main__":
 
     alignment_matrix, traceback_matrix = build_alignment_matrix(seq1, seq2, gap_penalty, match_score, mismatch_score)
 
-    # Pass the output_file parameter to the print_alignment_matrix function
-    print_alignment_matrix(alignment_matrix, seq1, seq2, output_file)
-
-    # Correct the function call by removing the output_file parameter
     result = backtrace(traceback_matrix, seq1, seq2)
 
     with open(output_file, "a") as file:
